@@ -1,0 +1,435 @@
+{
+  "swap_list": [
+    [
+      "baseMap",
+      [
+        "Diffuse (01)"
+      ]
+    ],
+    [
+      "baseMapLayer2",
+      [
+        "Diffuse (02)"
+      ]
+    ],
+    [
+      "baseMapLayer3",
+      [
+        "Diffuse (03)"
+      ]
+    ],
+    [
+      "baseMapLayer4",
+      [
+        "Diffuse (04)"
+      ]
+    ],
+    [
+      "roughnessMap",
+      [
+        "Roughness (01)"
+      ]
+    ],
+    [
+      "roughnessMapLayer2",
+      [
+        "Roughness (02)"
+      ]
+    ],
+    [
+      "roughnessMapLayer3",
+      [
+        "Roughness (03)"
+      ]
+    ],
+    [
+      "roughnessMapLayer4",
+      [
+        "Roughness (04)"
+      ]
+    ],
+    [
+      "normalMap",
+      [
+        "Normal (01)"
+      ]
+    ],
+    [
+      "normalMapLayer2",
+      [
+        "Normal (02)"
+      ]
+    ],
+    [
+      "normalMapLayer3",
+      [
+        "Normal (03)"
+      ]
+    ],
+    [
+      "normalMapLayer4",
+      [
+        "Normal (04)"
+      ]
+    ],
+    [
+      "AlphaMap",
+      [
+        "Alpha (01)"
+      ]
+    ],
+    [
+      "AlphaMapLayer2",
+      [
+        "Alpha (02)"
+      ]
+    ],
+    [
+      "AlphaMapLayer3",
+      [
+        "Alpha (03)"
+      ]
+    ],
+    [
+      "AlphaMapLayer4",
+      [
+        "Alpha (04)"
+      ]
+    ],
+    [
+      "emissionMap",
+      [
+        "Emission"
+      ]
+    ],
+    [
+      "metalnessMap",
+      [
+        "Metalic"
+      ]
+    ],
+    [
+      "aoMap",
+      [
+        "aoMap (01)"
+      ]
+    ],
+    [
+      "aoMapLayer2",
+      [
+        "aoMap (02)"
+      ]
+    ],
+    [
+      "aoMapLayer3",
+      [
+        "aoMap (03)"
+      ]
+    ],
+    [
+      "aoMapLayer4",
+      [
+        "aoMap (04)"
+      ]
+    ]
+  ],
+  "shader_variants": [
+    [
+      "0",
+      "Unsupported",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "1",
+      "Diffuse",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "513",
+      "Diffuse + Alpha-blend",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "1025",
+      "Diffuse + Alpha-test",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "3",
+      "Diffuse + Roughness",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "515",
+      "Diffuse + Roughness + Alpha-blend",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "1027",
+      "Diffuse + Roughness + Alpha-test",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "11",
+      "Diffuse + Roughness + Normal",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "1048587",
+      "Diffuse + Roughness + Normal + Emission",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "523",
+      "Diffuse + Roughness + Normal + Alpha-blend",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "1035",
+      "Diffuse + Roughness + Normal + Alpha-test",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "15",
+      "Diffuse + Roughness + Normal + Metalness",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "4111",
+      "Diffuse + Roughness + Normal + Metalness + Colormask",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "4103",
+      "Diffuse + Roughness + Metalness + Colormask",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "0000",
+      "4 Layers",
+      "RenderCoreLayeredMaterial"
+    ],
+    [
+      "1048655",
+      "Window",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "1048591",
+      "Emission",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "8389633",
+      "Foliage Diffuse + Alpha-test",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "8389643",
+      "Foliage Diffuse + Roughness + Normal + Alpha-test",
+      "RenderCoreMaterialV2"
+    ],
+    [
+      "100",
+      "Decal_Alpha-test",
+      "RenderCoreMeshDecalMaterial"
+    ],
+    [
+      "200",
+      "Decal_Alpha-blend",
+      "RenderCoreMeshDecalMaterial"
+    ],
+    [
+      "300",
+      "4 Layer Decal Alpha-test",
+      "RenderCoreMeshDecalLayeredMaterial"
+    ],
+    [
+      "400",
+      "4 Layer Decal Alpha-blend",
+      "RenderCoreMeshDecalLayeredMaterial"
+    ],
+    [
+      "10",
+      "COLLIDER",
+      "cxColliderMaterial"
+    ]
+  ],
+  "collision_types": [
+    [
+      "none",
+      "Disable",
+      "Без коллизии"
+    ],
+    [
+      "default",
+      "Default",
+      "По-умолчанию"
+    ],
+    [
+      "asphalt",
+      "Asphalt",
+      "Асфальт"
+    ],
+    [
+      "paving_slab",
+      "Paving Slab",
+      "Тротуарная плитка"
+    ],
+    [
+      "grass",
+      "Grass",
+      "Трава"
+    ],
+    [
+      "sand",
+      "Sand",
+      "Песок"
+    ],
+    [
+      "gravel",
+      "Gravel",
+      "Гравий"
+    ],
+    [
+      "cobbles",
+      "Cobbles",
+      "Брусчатка"
+    ],
+    [
+      "cobbles_big",
+      "Cobbles Big",
+      "Брусчатка с большими камнями"
+    ],
+    [
+      "concrete",
+      "Concrete",
+      "Бетон"
+    ],
+    [
+      "dirt",
+      "Dirt",
+      "Земля"
+    ],
+    [
+      "kerb_racetrack",
+      "Kerb Racetrack",
+      "Бордюры гоночных трасс"
+    ],
+    [
+      "snow",
+      "Snow",
+      "Снег"
+    ],
+    [
+      "snow_deep",
+      "Snow Deep",
+      "Глубокий снег"
+    ],
+    [
+      "snow_asphalt",
+      "Snow Asphalt",
+      "Асфальт со снегом"
+    ],
+    [
+      "snow_gravel",
+      "Snow Gravel",
+      "Гравий со снегом"
+    ],
+    [
+      "snow_cobbles",
+      "Snow Cobbles",
+      "Брусчатка со снегом"
+    ],
+    [
+      "metal",
+      "Metal",
+      "Металическая поверхность"
+    ],
+    [
+      "metal_manhole",
+      "Metal Manhole",
+      "Металлическая решётка"
+    ],
+    [
+      "metal_grille",
+      "Metal Grille",
+      "Металлическая решётка 2"
+    ],
+    [
+      "wood",
+      "Wood",
+      "Дерево"
+    ],
+    [
+      "wood_plank",
+      "Wood Plank",
+      "Деревянная доска"
+    ],
+    [
+      "brick",
+      "Brick",
+      "Кирпич"
+    ],
+    [
+      "plastic",
+      "Plastic",
+      "Пластик"
+    ],
+    [
+      "liquid_water",
+      "Liquid Water",
+      "Вода \\ Лужа"
+    ],
+    [
+      "road_icy",
+      "Road Icy",
+      "Ледяная дорога"
+    ],
+    [
+      "ice_snowy",
+      "Ice with Snow",
+      "Лёд со снегом"
+    ],
+    [
+      "invisible",
+      "Invisible",
+      "Невидимая поверхность"
+    ],
+    [
+      "metal_fence",
+      "Metal Fence",
+      "забор с толстыми прутьями"
+    ],
+    [
+      "chain_link_fence",
+      "ChainLink Fence",
+      "Сетка рабица"
+    ],
+    [
+      "paper",
+      "Paper",
+      "Бумага и картон"
+    ],
+    [
+      "rubber",
+      "Rubber",
+      "Покрышки и резина"
+    ],
+    [
+      "soft",
+      "Soft",
+      "Маты, брезент"
+    ],
+    [
+      "road_dirt",
+      "Road Dirt",
+      "Дорога с грязью"
+    ],
+    [
+      "road_gravel",
+      "Road Gravel",
+      "Гравийная дорога"
+    ]
+  ]
+}
