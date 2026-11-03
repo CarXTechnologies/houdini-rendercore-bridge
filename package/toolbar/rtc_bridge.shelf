@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <toolshelf name="rtc_rendercore" label="RTC RenderCore">
+    <memberTool name="rtc_rc_material"/>
+    <memberTool name="rtc_rc_assign"/>
+    <memberTool name="rtc_rc_preview"/>
+    <memberTool name="rtc_rc_send"/>
+    <memberTool name="rtc_rc_receive"/>
+  </toolshelf>
+  <tool name="rtc_rc_material" label="New RC Material" icon="SHOP_material">
+    <script scriptType="python"><![CDATA[import rtc_bridge.bridge as b
+b.material_dialog()]]></script>
+  </tool>
+  <tool name="rtc_rc_assign" label="Assign RC Material" icon="SOP_material">
+    <script scriptType="python"><![CDATA[import rtc_bridge.bridge as b
+b.assign_material_dialog()]]></script>
+  </tool>
+  <tool name="rtc_rc_send" label="Send to Max" icon="ROP_fbx">
+    <script scriptType="python"><![CDATA[import rtc_bridge
+rtc_bridge.export_selection()]]></script>
+  </tool>
+  <tool name="rtc_rc_preview" label="Preview RC" icon="VIEW_display">
+    <script scriptType="python"><![CDATA[import rtc_bridge.bridge as b
+b.prepare_preview()]]></script>
+  </tool>
+  <tool name="rtc_rc_receive" label="Get from Max" icon="ROP_fbx">
+    <script scriptType="python"><![CDATA[import rtc_bridge.importer as i
+i.import_dialog()]]></script>
+  </tool>
+</shelfDocument>
