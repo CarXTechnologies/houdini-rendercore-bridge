@@ -4,6 +4,8 @@
 
 ## Быстрый запуск
 
+**Обязательная зависимость для 3ds Max:** установите аддон **CarXBridge** из [CarXTechnologies/3D-bridges](https://github.com/CarXTechnologies/3D-bridges) по инструкции этого репозитория. Он устанавливается отдельно от Houdini-пакета. Также в Max должен быть установлен RenderCore.
+
 1. Скачать репозиторий через **Code → Download ZIP**, распаковать и запустить `Install.cmd`.
 2. Перезапустить Houdini; включить **+ → Shelves → RTC RenderCore**.
 3. Houdini → Max: **Send to Max**, затем прежняя **Get from Blender** в Max.
@@ -12,6 +14,8 @@
 Нужны Houdini 20.5 / Python 3.11 с поддержкой FBX, 3ds Max с RenderCore и действующим CarXBridge. Проверенная конфигурация: Houdini 20.5.278 и Max 2023.2.2. Max-скрипты, RenderCore, текстуры и пользовательские сцены в репозиторий не входят.
 
 Подробности: [GUIDE.md](GUIDE.md), [тесты](tests/README.md), [история](CHANGELOG.md).
+
+[Краткая инструкция со скриншотами (PDF)](docs/Houdini_RenderCore_Bridge_Quick_Guide_RU.pdf).
 
 ## Изменения 1.2.0
 

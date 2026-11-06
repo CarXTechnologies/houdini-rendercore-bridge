@@ -4,6 +4,8 @@
 
 ## Установка и обновление
 
+**Сначала установите аддон для 3ds Max:** [CarXBridge — CarXTechnologies/3D-bridges](https://github.com/CarXTechnologies/3D-bridges). Следуйте инструкции в этом репозитории. Аддон Max устанавливается отдельно и обязателен для обмена; Houdini-установщик его не устанавливает. В Max также требуется RenderCore.
+
 Распаковать архив, запустить `Install.cmd`, перезапустить Houdini 20.5. В меню полок **+ → Shelves → RTC RenderCore** включить полку. Старый установленный пакет и JSON настроек автоматически сохраняются рядом с суффиксом `.backup-дата`. Для нестандартной папки настроек: `powershell -File Install.ps1 -PreferencesDirectory "D:/HoudiniPrefs"`.
 
 ## Из Max в Houdini
