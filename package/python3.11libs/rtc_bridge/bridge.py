@@ -15,6 +15,44 @@ SCHEMA = json.loads(Path(__file__).with_name('schema.json').read_text(encoding='
 SOCKETS = [s[0] for s in SCHEMA['swap_list']]
 SHADERS = sorted({v[2] for v in SCHEMA['shader_variants']})
 VARIANTS = {v[0]: v[2] for v in SCHEMA['shader_variants']}
+NAVMESH_TYPES = ('block', 'walk', 'road')
+
+
+def normalize_navmesh(value):
+    """Match the reference Blender transport, including legacy numeric values."""
+    if isinstance(value, bool):
+        return 'block'
+    value = str(value).strip().lower()
+    if value in NAVMESH_TYPES:
+        return value
+    return NAVMESH_TYPES[int(value)] if value in ('0', '1', '2') else 'block'
+
+
+def _navmesh_template(value='block'):
+    parm = hou.StringParmTemplate('rc_navmesh_type', 'NavMesh type', 1,
+        default_value=(normalize_navmesh(value),), menu_items=NAVMESH_TYPES,
+        menu_labels=('Block (0)', 'Walk (1)', 'Road (2)'))
+    parm.setHelp('NavMesh classification when collision is enabled. Requires the updated Max CarXBridge addon.')
+    parm.setConditional(hou.parmCondType.HideWhen, '{ rc_use_collision == 0 }')
+    return parm
+
+
+def ensure_material_options(mat):
+    """Upgrade old HIP materials in place, retaining all existing RC values."""
+    group = mat.parmTemplateGroup()
+    changed = False
+    if not mat.parm('rc_navmesh_type'):
+        group.insertAfter('rc_use_collision', _navmesh_template())
+        changed = True
+    variant = group.find('rc_variant')
+    callback = "import rtc_bridge.bridge as b; b.sync_preview(kwargs['node'])"
+    if variant and variant.scriptCallback() != callback:
+        variant.setScriptCallback(callback)
+        variant.setScriptCallbackLanguage(hou.scriptLanguage.Python)
+        group.replace('rc_variant', variant)
+        changed = True
+    if changed:
+        mat.setParmTemplateGroup(group)
 
 
 def material_key(mat):
@@ -90,6 +128,7 @@ def create_material(name='RenderCore', data=None):
         menu_labels=tuple(c[1] for c in collision)))
     folder.addParmTemplate(hou.ToggleParmTemplate('rc_use_collision','Enable collision',
         default_value=bool(data.get('use_collision',data.get('collision','none')!='none'))))
+    folder.addParmTemplate(_navmesh_template(data.get('navmesh_type', 'block')))
     tex = {t['name']: t for t in data.get('textures', [])}
     for layer in range(1, 5):
         f = hou.FolderParmTemplate('rc_layer'+str(layer), 'Layer '+str(layer))
@@ -114,8 +153,18 @@ def create_material(name='RenderCore', data=None):
 
 def sync_preview(mat):
     """Principled preview is approximate; RenderCore runs in Max, not Houdini."""
-    # RenderCore uses Cd as layer weights, not a multiplier for the diffuse preview.
-    mat.parm('basecolor_usePointColor').set(0)
+    ensure_material_options(mat)
+    # Display-only SOP replaces layer-weight Cd with the appropriate alpha tint.
+    # Raw Alpha/Cd on the authored/render stream remain unchanged.
+    mat.parm('basecolor_usePointColor').set(1)
+    from .preview import DECAL_SHADERS
+    shader = VARIANTS.get(mat.evalParm('rc_variant'))
+    texture_alpha = str(mat.evalParm('rc_variant')) in ('523', '1035', '8389121', '8389633', '8389643')
+    decal = shader in DECAL_SHADERS
+    mat.parm('opacpointalpha').set(1 if decal else 0)
+    mat.parm('alphablendmode').set('mask' if texture_alpha and str(mat.evalParm('rc_variant')) in ('1035','8389633','8389643') else 'blend' if decal or texture_alpha else 'opaque')
+    mat.parm('opaccolor_texture').setExpression('chs("rc_AlphaMap")', hou.exprLanguage.Hscript)
+    mat.parm('opaccolor_useTexture').setExpression('strlen(chs("rc_AlphaMap")) > 0' if decal or texture_alpha else '0', hou.exprLanguage.Hscript)
     mat.parmTuple('basecolor').set((0.8,0.8,0.8))
     mapping = [('baseMap','basecolor_texture','basecolor_useTexture'),
                ('roughnessMap','rough_texture','rough_useTexture'),
@@ -127,6 +176,7 @@ def sync_preview(mat):
     if mat.parm('baseNormal_texture'):
         mat.parm('baseNormal_texture').setExpression('chs("rc_normalMap")', hou.exprLanguage.Hscript)
         mat.parm('baseBumpAndNormal_enable').setExpression('strlen(chs("rc_normalMap")) > 0', hou.exprLanguage.Hscript)
+    configure_viewer()
 
 
 def material_data(mat, check_files=True):
@@ -152,7 +202,8 @@ def material_data(mat, check_files=True):
             raise ValueError('Stock Max reads tiling only for RenderCoreLayeredMaterial. Use a UV Transform SOP for this shader.')
         textures.append(dict(name=socket, path=path, scale=scale))
     return dict(name=mat.evalParm('rc_source_name') or mat.name(), shader=VARIANTS[variant], variant=variant,
-                collision=collision, use_collision=bool(mat.evalParm('rc_use_collision')) if mat.parm('rc_use_collision') else collision != 'none', textures=textures)
+                collision=collision, use_collision=bool(mat.evalParm('rc_use_collision')) if mat.parm('rc_use_collision') else collision != 'none',
+                navmesh_type=normalize_navmesh(mat.evalParm('rc_navmesh_type') if mat.parm('rc_navmesh_type') else 'block'), textures=textures)
 
 
 def exchange_paths(scale_section='Import'):
@@ -175,9 +226,12 @@ def exchange_paths(scale_section='Import'):
 
 
 def _selection(nodes):
+    from .preview import authored_sop
     result=[]
     for n in nodes:
         if n.type().category()==hou.sopNodeTypeCategory():
+            n=authored_sop(n)
+            if n is None: raise ValueError('Preview SOP has no authored input')
             obj=n.parent()
             while obj and obj.type().category()!=hou.objNodeTypeCategory(): obj=obj.parent()
             if not obj or obj.type().name()!='geo': raise ValueError('SOP must belong to a Geometry object')
@@ -192,6 +246,7 @@ def _selection(nodes):
         else: raise ValueError('Unsupported selection: '+n.path())
     unique={}
     for obj,sop in result:
+        sop=authored_sop(sop)
         if obj.path() in unique and unique[obj.path()][1] != sop:
             raise ValueError('Select one SOP output per Geometry object')
         unique[obj.path()]=(obj,sop)
@@ -327,6 +382,11 @@ def export_nodes(nodes, destination=None, check_files=True):
                 'material_aliases':aliases,
                 'fbx':str(fbx_dir/'TMP_BLENDER.fbx'),'metadata':str(meta_dir),
                 'backup':str(backup),'warnings':list(rop.warnings())}
+        if not destination and any(d['use_collision'] and d['navmesh_type'] != 'block' for d in materials.values()):
+            candidates = list((Path(os.environ['RTC_MAX_BRIDGE_INI']).parent,)) if os.environ.get('RTC_MAX_BRIDGE_INI') else list(
+                (Path(os.environ['LOCALAPPDATA'])/'Autodesk'/'3dsMax'/'2023 - 64bit').glob('*/scripts/CarXBridge'))
+            if not candidates or not all((p/'import_materials.py').is_file() and 'navmesh_type' in (p/'import_materials.py').read_text(encoding='utf-8-sig',errors='replace') for p in candidates):
+                report['warnings'].append('NavMesh is present in the exported JSON, but the installed Max addon may not read navmesh_type. Install the updated CarXTechnologies/3D-bridges Max addon; old versions ignore this field.')
         (meta_dir/'HoudiniLastExport.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
         return report
     finally:
@@ -340,7 +400,8 @@ def export_selection():
     try:
         report=export_nodes(hou.selectedNodes())
         hou.ui.displayMessage('Export complete: '+str(len(report['objects']))+' objects, '+str(report['materials'])+
-                              ' RenderCore materials.\nIn 3ds Max click Get from Blender.\n'+report['fbx'])
+                              ' RenderCore materials.\nIn 3ds Max click Get from Blender.\n'+report['fbx']+
+                              ('\n\n'+'\n'.join(report['warnings']) if report['warnings'] else ''))
     except Exception as e:
         hou.ui.displayMessage(str(e),severity=hou.severityType.Error)
 
@@ -355,13 +416,25 @@ def material_dialog():
     if pane: pane.setCurrentNode(mat)
 
 
-def prepare_preview():
-    """Viewport Cd multiplication is unsuitable for RenderCore layer masks."""
+def configure_viewer():
+    """Enable the material/color/transparency paths required by RC preview."""
+    if not hou.isUIAvailable():
+        return
     viewer=hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
     if viewer:
         settings=viewer.curViewport().settings()
-        settings.showGeometryColor(False)
+        settings.showGeometryColor(True)
+        settings.showMaterials(True)
+        settings.useTransparency(True)
         settings.setLighting(hou.viewportLighting.Headlight)
+
+
+def prepare_preview():
+    """Upgrade materials and attach live alpha visualization to authored outputs."""
+    configure_viewer()
+    from .preview import refresh
+    selected=[n for n in hou.selectedNodes() if n.type().category() in (hou.sopNodeTypeCategory(),hou.objNodeTypeCategory())]
+    return refresh(selected or None)
 
 
 def assign_material_dialog():
@@ -376,4 +449,6 @@ def assign_material_dialog():
             assign.setInput(0,sop); assign.parm('shop_materialpath1').set(path)
             assign.setDisplayFlag(True); assign.setRenderFlag(True)
             assign.moveToGoodPosition(); assign.setCurrent(True,clear_all_selected=True)
+            from .preview import attach
+            attach(obj, assign)
     except Exception as e: hou.ui.displayMessage(str(e),severity=hou.severityType.Error)

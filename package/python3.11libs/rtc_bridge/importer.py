@@ -3,7 +3,7 @@ import json,math,os,re
 from pathlib import Path
 import uuid
 import hou
-from .bridge import create_material,material_data,exchange_paths,safe_name,bake_geometry,scene_materials_by_name,VARIANTS,SOCKETS,SCHEMA
+from .bridge import create_material,material_data,exchange_paths,safe_name,bake_geometry,scene_materials_by_name,VARIANTS,SOCKETS,SCHEMA,normalize_navmesh,sync_preview
 
 
 def _read_materials(folder):
@@ -20,6 +20,7 @@ def _read_materials(folder):
         if data.get('collision') not in {c[0] for c in SCHEMA['collision_types']}:
             raise ValueError('Unknown collision surface on '+name)
         data['variant']=variant
+        data['navmesh_type']=normalize_navmesh(data.get('navmesh_type','block'))
         data['use_collision']=data.get('use_collision') in (True,'True','true',1)
         seen=set()
         for tex in data.get('textures',[]):
@@ -106,6 +107,7 @@ def import_from_max(source=None,materials_dir=None):
                 for tex in sidecars[name]['textures']:
                     if not Path(tex['path']).is_file():warnings.append('Missing texture: '+tex['path'])
             else:reused.append(name)
+            sync_preview(mat)
             materials[name]=mat
         for name,geo,resolved in prepared:
             attr=geo.findPrimAttrib('shop_materialpath')
@@ -115,6 +117,8 @@ def import_from_max(source=None,materials_dir=None):
             stash=obj.createNode('stash','FROM_MAX');stash.parm('stash').set(geo)
             out=obj.createNode('null','OUT');out.setInput(0,stash)
             out.setDisplayFlag(True);out.setRenderFlag(True);obj.layoutChildren()
+            from .preview import attach
+            attach(obj, out)
         batch.layoutChildren();batch.setUserData('rtc_import_session',session)
         batch.setUserData('rtc_max_source',str(source))
         batch.setSelected(True,clear_all_selected=True)
